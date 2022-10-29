@@ -19,10 +19,11 @@ class AssistantMethods {
     if (requestResponse != "Failed") {
       humanReadableAddress = requestResponse['display_name'];
       Address userPickupAddress = Address(
-          humanReadableAddress: humanReadableAddress,
-          locationLatitude: position.latitude,
-          locationLongitude: position.longitude,
-          locationName: humanReadableAddress);
+        humanReadableAddress: humanReadableAddress,
+        locationLatitude: position.latitude,
+        locationLongitude: position.longitude,
+        locationName: humanReadableAddress,
+      );
       Provider.of<AppInfo>(context, listen: false)
           .updateUserPickupAddress(userPickupAddress);
       return humanReadableAddress;

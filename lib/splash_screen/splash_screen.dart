@@ -23,8 +23,8 @@ class _MySplashScreenState extends State<MySplashScreen> {
         // Navigator.push(
         //     context, MaterialPageRoute(builder: (c) => const MainScreen()));
         if (fauth.currentUser != null) {
-          Navigator.push(context,
-              MaterialPageRoute(builder: (c) => const SearchPagesScreen()));
+          Navigator.push(
+              context, MaterialPageRoute(builder: (c) => const MainScreen()));
         } else {
           Navigator.push(
               context, MaterialPageRoute(builder: (c) => const LoginScreen()));

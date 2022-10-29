@@ -1,12 +1,63 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
+import 'package:users_app/app_info/app_info.dart';
+import 'package:users_app/assistants/request_assistant.dart';
+import 'package:users_app/global/api_key.dart';
+import 'package:users_app/models/address.dart';
 import 'package:users_app/models/predicted_places.dart';
 
 class PlacePredictionTile extends StatelessWidget {
   final PredictedPlace? predictedPlace;
-  PlacePredictionTile({super.key, this.predictedPlace});
+  PlacePredictionTile({this.predictedPlace});
 
   @override
   Widget build(BuildContext context) {
-    return Container();
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(primary: Colors.white24),
+      onPressed: () async {
+        print(predictedPlace!.latitude);
+        print(predictedPlace!.longitude);
+        String fetchAddressUrl =
+            "https://us1.locationiq.com/v1/reverse?key=${mapRequestKey}&lat=${predictedPlace!.latitude}&lon=${predictedPlace!.latitude}&format=json";
+        final predictedPlaceAddress =
+            await RequestAssistant.recieveRequest(fetchAddressUrl);
+        Provider.of<AppInfo>(context, listen: false).updateDropOffAddress(
+          Address(
+            humanReadableAddress: predictedPlaceAddress['display_name'],
+            locationId: predictedPlaceAddress['place_id'],
+            locationLatitude: predictedPlace!.latitude,
+            locationLongitude: predictedPlace!.longitude,
+            locationName: predictedPlaceAddress['display_name'],
+          ),
+        );
+      },
+      child: Padding(
+        padding: const EdgeInsets.all(8.0),
+        child: Row(
+          children: [
+            Icon(Icons.add_location),
+            SizedBox(
+              width: 20,
+            ),
+            Expanded(
+              child: Column(
+                children: [
+                  Text(
+                    predictedPlace!.display_place.toString(),
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 16, color: Colors.white54),
+                  ),
+                  Text(
+                    predictedPlace!.display_address.toString(),
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(fontSize: 16, color: Colors.white54),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
   }
 }

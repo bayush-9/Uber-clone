@@ -46,7 +46,7 @@ class _MainScreenState extends State<MainScreen> {
     }
   }
 
-  locateUserPosition() async {
+  locateUserPosition(BuildContext context) async {
     userCurrentPosition = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
     LatLng latLngPosition =
@@ -55,6 +55,7 @@ class _MainScreenState extends State<MainScreen> {
         CameraPosition(target: latLngPosition, zoom: 14);
     newGooglemapController!
         .animateCamera(CameraUpdate.newCameraPosition(cameraPosition));
+    print("locate user position");
     String humanReadableAddress =
         await AssistantMethods.searchAddressForGeographicCoordinates(
             userCurrentPosition!, context);
@@ -81,7 +82,7 @@ class _MainScreenState extends State<MainScreen> {
             onMapCreated: (controller) {
               _controller.complete(controller);
               newGooglemapController = controller;
-              locateUserPosition();
+              locateUserPosition(context);
             },
           ),
           Positioned(
@@ -127,7 +128,7 @@ class _MainScreenState extends State<MainScreen> {
                             style: TextStyle(color: Colors.grey, fontSize: 16),
                           ),
                           Text(
-                            // "kajsnkdj",
+                            // TO DO
                             (Provider.of<AppInfo>(context, listen: false)
                                         .userPickupAddress!
                                         .locationName
@@ -160,27 +161,33 @@ class _MainScreenState extends State<MainScreen> {
                         ),
                       );
                     },
-                    child: Row(
-                      children: [
-                        const Icon(
-                          Icons.place,
-                          color: Colors.grey,
-                        ),
-                        Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              "To",
-                              style:
-                                  TextStyle(color: Colors.grey, fontSize: 16),
-                            ),
-                            Text(
-                              "Dropoff location",
-                              style: TextStyle(color: Colors.grey),
-                            ),
-                          ],
-                        ),
-                      ],
+                    child: GestureDetector(
+                      onTap: () => Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                              builder: (ctx) => SearchPagesScreen())),
+                      child: Row(
+                        children: [
+                          const Icon(
+                            Icons.place,
+                            color: Colors.grey,
+                          ),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: const [
+                              Text(
+                                "To",
+                                style:
+                                    TextStyle(color: Colors.grey, fontSize: 16),
+                              ),
+                              Text(
+                                "Dropoff location",
+                                style: TextStyle(color: Colors.grey),
+                              ),
+                            ],
+                          ),
+                        ],
+                      ),
                     ),
                   ),
                   const SizedBox(

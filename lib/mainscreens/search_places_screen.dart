@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:users_app/assistants/request_assistant.dart';
 import 'package:users_app/global/api_key.dart';
 import 'package:users_app/models/predicted_places.dart';
+import 'package:users_app/widgets/place_prediction_tile.dart';
 
 class SearchPagesScreen extends StatefulWidget {
   const SearchPagesScreen({super.key});
@@ -23,9 +24,9 @@ class _SearchPagesScreenState extends State<SearchPagesScreen> {
       } else {
         var placePredictionList =
             (response as List).map((e) => PredictedPlace.fromJson(e)).toList();
-
-        placePredictedList = placePredictionList;
-        print(placePredictedList);
+        setState(() {
+          placePredictedList = placePredictionList;
+        });
       }
     }
   }
@@ -96,7 +97,24 @@ class _SearchPagesScreenState extends State<SearchPagesScreen> {
               ],
             ),
           ),
-        )
+        ),
+        placePredictedList.length > 0
+            ? Expanded(
+                child: ListView.separated(
+                    physics: ClampingScrollPhysics(),
+                    itemBuilder: (context, index) {
+                      return PlacePredictionTile(
+                        predictedPlace: placePredictedList[index],
+                      );
+                    },
+                    separatorBuilder: (context, index) {
+                      return Divider(
+                        height: 1,
+                      );
+                    },
+                    itemCount: placePredictedList.length),
+              )
+            : Container(),
       ]),
     );
   }
