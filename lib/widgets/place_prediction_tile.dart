@@ -16,7 +16,7 @@ class PlacePredictionTile extends StatelessWidget {
       style: ElevatedButton.styleFrom(primary: Colors.white24),
       onPressed: () async {
         String fetchAddressUrl =
-            "https://us1.locationiq.com/v1/reverse?key=${mapRequestKey}&lat=${predictedPlace!.latitude}&lon=${predictedPlace!.latitude}&format=json";
+            "https://us1.locationiq.com/v1/reverse?key=${mapRequestKey}&lat=${predictedPlace!.latitude}&lon=${predictedPlace!.longitude}&format=json";
         final predictedPlaceAddress =
             await RequestAssistant.recieveRequest(fetchAddressUrl);
         Provider.of<AppInfo>(context, listen: false).updateDropOffAddress(
@@ -28,7 +28,7 @@ class PlacePredictionTile extends StatelessWidget {
             locationName: predictedPlaceAddress['display_name'],
           ),
         );
-        Navigator.of(context).pop();
+        Navigator.pop(context, "locationSelected");
       },
       child: Padding(
         padding: const EdgeInsets.all(8.0),
@@ -53,10 +53,13 @@ class PlacePredictionTile extends StatelessWidget {
                           fontWeight: FontWeight.bold),
                     ),
                   ),
-                  Text(
-                    predictedPlace!.display_address.toString(),
-                    overflow: TextOverflow.ellipsis,
-                    style: TextStyle(fontSize: 16, color: Colors.white54),
+                  Container(
+                    width: double.infinity,
+                    child: Text(
+                      predictedPlace!.display_address.toString(),
+                      overflow: TextOverflow.ellipsis,
+                      style: TextStyle(fontSize: 16, color: Colors.white54),
+                    ),
                   ),
                 ],
               ),

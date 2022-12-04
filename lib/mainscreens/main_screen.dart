@@ -164,19 +164,31 @@ class _MainScreenState extends State<MainScreen> {
                     height: 10,
                   ),
                   GestureDetector(
-                    onTap: () {
-                      Navigator.push(
+                    onTap: () async {
+                      await Navigator.push(
                         context,
                         MaterialPageRoute(
                           builder: (context) => SearchPagesScreen(),
                         ),
                       );
+
+                      // }
                     },
                     child: GestureDetector(
-                      onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (ctx) => SearchPagesScreen())),
+                      onTap: () {
+                        Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                    builder: (ctx) => SearchPagesScreen()))
+                            .then((value) async {
+                          setState(() {});
+                          print(
+                              ".....................Printing_here.....................");
+
+                          // if (result == "locationSelected") {
+                          await drawPolylineFromSourceToDestination();
+                        });
+                      },
                       child: Row(
                         children: [
                           const Icon(
@@ -203,9 +215,11 @@ class _MainScreenState extends State<MainScreen> {
                                   null)
                                 Text(
                                   Provider.of<AppInfo>(context, listen: false)
-                                      .userDropOffAddress!
-                                      .locationName
-                                      .toString(),
+                                          .userDropOffAddress!
+                                          .locationName
+                                          .toString()
+                                          .substring(0, 50) +
+                                      "...",
                                   style: TextStyle(color: Colors.grey),
                                 ),
                             ],
@@ -240,5 +254,23 @@ class _MainScreenState extends State<MainScreen> {
         ],
       ),
     ));
+  }
+
+  Future<void> drawPolylineFromSourceToDestination() async {
+    var sourcePosition =
+        Provider.of<AppInfo>(context, listen: false).userPickupAddress;
+    var destinationPosition =
+        Provider.of<AppInfo>(context, listen: false).userDropOffAddress;
+    var sourceLatLng = LatLng(double.parse(sourcePosition!.locationLatitude!),
+        double.parse(sourcePosition.locationLongitude!));
+    var destinationLatLng = LatLng(
+        double.parse(destinationPosition!.locationLatitude!),
+        double.parse(destinationPosition.locationLongitude!));
+
+    var directionDetailsInfo =
+        await AssistantMethods.obtainOriginToDestinationDirectionDetails(
+            sourceLatLng, destinationLatLng);
+
+    print(directionDetailsInfo?.e_points);
   }
 }

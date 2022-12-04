@@ -7,6 +7,8 @@ import 'package:users_app/assistants/request_assistant.dart';
 import 'package:users_app/global/api_key.dart';
 import 'package:users_app/global/globals.dart';
 import 'package:users_app/models/address.dart';
+import 'package:google_maps_flutter/google_maps_flutter.dart';
+import 'package:users_app/models/direction_details_info.dart';
 import '../models/user_model.dart';
 
 class AssistantMethods {
@@ -45,5 +47,31 @@ class AssistantMethods {
         print(userModelCurrentInfo!.name);
       } else {}
     });
+  }
+
+  static Future<DirectionDetailsInfo?>
+      obtainOriginToDestinationDirectionDetails(
+          LatLng originPosition, LatLng destinationPosition) async {
+    final String obtainOriginToDestinationDirectionDetailsUrl =
+        'https://us1.locationiq.com/v1/directions/driving/${originPosition.latitude},${originPosition.longitude};${originPosition.latitude},${originPosition.longitude}?key=pk.6c50b1cb5baf570507878fdf32b6b0db&alternatives=false&steps=false&geometries=polyline&overview=full&annotations=true';
+
+    var directionResponse = await RequestAssistant.recieveRequest(
+        obtainOriginToDestinationDirectionDetailsUrl);
+
+    if (directionResponse == 'Failed') {
+      return null;
+    } else {
+      DirectionDetailsInfo directionDetailsInfo = DirectionDetailsInfo();
+
+      directionDetailsInfo.e_points =
+          directionResponse["routes"][0]['geometry'];
+
+      directionDetailsInfo.distance =
+          directionResponse['routes'][0]['legs'][0]['weight'];
+      directionDetailsInfo.duration =
+          directionResponse['routes'][0]['legs'][0]['duration'];
+
+      return directionDetailsInfo;
+    }
   }
 }
