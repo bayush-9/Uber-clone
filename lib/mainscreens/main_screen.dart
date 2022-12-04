@@ -43,10 +43,12 @@ class _MainScreenState extends State<MainScreen> {
 
     if (_locationPermission == LocationPermission.denied) {
       _locationPermission = await Geolocator.requestPermission();
+    } else {
+      locateUserPosition();
     }
   }
 
-  locateUserPosition(BuildContext context) async {
+  locateUserPosition() async {
     userCurrentPosition = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high);
     LatLng latLngPosition =
@@ -60,6 +62,7 @@ class _MainScreenState extends State<MainScreen> {
         await AssistantMethods.searchAddressForGeographicCoordinates(
             userCurrentPosition!, context);
     print("this is your address" + humanReadableAddress);
+    setState(() {});
   }
 
   @override
@@ -82,7 +85,7 @@ class _MainScreenState extends State<MainScreen> {
             onMapCreated: (controller) {
               _controller.complete(controller);
               newGooglemapController = controller;
-              locateUserPosition(context);
+              // locateUserPosition();
             },
           ),
           Positioned(
@@ -127,16 +130,24 @@ class _MainScreenState extends State<MainScreen> {
                             "From",
                             style: TextStyle(color: Colors.grey, fontSize: 16),
                           ),
-                          Text(
-                            // TO DO
-                            (Provider.of<AppInfo>(context, listen: false)
-                                        .userPickupAddress!
-                                        .locationName
-                                        .toString())
-                                    .substring(0, 50) +
-                                "...",
-                            style: TextStyle(color: Colors.grey),
-                          ),
+                          if (Provider.of<AppInfo>(context, listen: false)
+                                  .userPickupAddress ==
+                              null)
+                            Text("Not getting address"),
+                          if (Provider.of<AppInfo>(context, listen: false)
+                                  .userPickupAddress !=
+                              null)
+                            Text(
+                              // TO DO
+
+                              (Provider.of<AppInfo>(context, listen: false)
+                                          .userPickupAddress!
+                                          .locationName
+                                          .toString())
+                                      .substring(0, 50) +
+                                  "...",
+                              style: TextStyle(color: Colors.grey),
+                            ),
                         ],
                       ),
                     ],
@@ -174,16 +185,29 @@ class _MainScreenState extends State<MainScreen> {
                           ),
                           Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: const [
+                            children: [
                               Text(
                                 "To",
                                 style:
                                     TextStyle(color: Colors.grey, fontSize: 16),
                               ),
-                              Text(
-                                "Dropoff location",
-                                style: TextStyle(color: Colors.grey),
-                              ),
+                              if (Provider.of<AppInfo>(context, listen: false)
+                                      .userDropOffAddress ==
+                                  null)
+                                Text(
+                                  "Dropoff location",
+                                  style: TextStyle(color: Colors.grey),
+                                ),
+                              if (Provider.of<AppInfo>(context, listen: false)
+                                      .userDropOffAddress !=
+                                  null)
+                                Text(
+                                  Provider.of<AppInfo>(context, listen: false)
+                                      .userDropOffAddress!
+                                      .locationName
+                                      .toString(),
+                                  style: TextStyle(color: Colors.grey),
+                                ),
                             ],
                           ),
                         ],

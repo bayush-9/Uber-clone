@@ -2,8 +2,8 @@ class PredictedPlace {
   String? place_id;
   String? display_place;
   String? display_address;
-  double? latitude;
-  double? longitude;
+  String? latitude;
+  String? longitude;
 
   PredictedPlace(
       {this.place_id,

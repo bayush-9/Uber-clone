@@ -2,8 +2,8 @@ class Address {
   String? humanReadableAddress;
   String? locationName;
   String? locationId;
-  double? locationLongitude;
-  double? locationLatitude;
+  String? locationLongitude;
+  String? locationLatitude;
 
   Address({
     this.humanReadableAddress,

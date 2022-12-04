@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
-import 'package:users_app/mainscreens/search_places_screen.dart';
 
 import '../assistants/assistant_methods.dart';
 import '../authentication/login_screen.dart';
@@ -20,8 +19,6 @@ class _MySplashScreenState extends State<MySplashScreen> {
     Timer(
       const Duration(seconds: 3),
       () async {
-        // Navigator.push(
-        //     context, MaterialPageRoute(builder: (c) => const MainScreen()));
         if (fauth.currentUser != null) {
           Navigator.push(
               context, MaterialPageRoute(builder: (c) => const MainScreen()));

@@ -20,8 +20,8 @@ class AssistantMethods {
       humanReadableAddress = requestResponse['display_name'];
       Address userPickupAddress = Address(
         humanReadableAddress: humanReadableAddress,
-        locationLatitude: position.latitude,
-        locationLongitude: position.longitude,
+        locationLatitude: position.latitude.toString(),
+        locationLongitude: position.longitude.toString(),
         locationName: humanReadableAddress,
       );
       Provider.of<AppInfo>(context, listen: false)
