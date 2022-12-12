@@ -22,7 +22,6 @@ class _SearchPagesScreenState extends State<SearchPagesScreen> {
       if (response == "Failed") {
         print("Failed");
       } else {
-        print(response);
         var placePredictionList =
             (response as List).map((e) => PredictedPlace.fromJson(e)).toList();
         setState(() {

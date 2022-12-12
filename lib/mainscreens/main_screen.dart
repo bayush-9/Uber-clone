@@ -1,6 +1,8 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:flutter_polyline_points/flutter_polyline_points.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:google_maps_flutter/google_maps_flutter.dart';
 import 'package:provider/provider.dart';
@@ -9,6 +11,8 @@ import 'package:users_app/assistants/assistant_methods.dart';
 import 'package:users_app/global/globals.dart';
 import 'package:users_app/mainscreens/search_places_screen.dart';
 import 'package:users_app/widgets/my_drawer.dart';
+
+import '../models/address.dart';
 
 class MainScreen extends StatefulWidget {
   const MainScreen({super.key});
@@ -36,7 +40,14 @@ class _MainScreenState extends State<MainScreen> {
   Position? userCurrentPosition;
   var geolocator = Geolocator();
 
+  var result;
+
+  List<LatLng> pLineCoordinateList = [];
+  Set<Polyline> polylineSet = {};
+
   LocationPermission? _locationPermission;
+
+  bool showNavigationDrawer = true;
 
   checkIfPermissionAllowed() async {
     _locationPermission = await Geolocator.requestPermission();
@@ -61,7 +72,7 @@ class _MainScreenState extends State<MainScreen> {
     String humanReadableAddress =
         await AssistantMethods.searchAddressForGeographicCoordinates(
             userCurrentPosition!, context);
-    print("this is your address" + humanReadableAddress);
+    print("this is your address$humanReadableAddress");
     setState(() {});
   }
 
@@ -82,25 +93,29 @@ class _MainScreenState extends State<MainScreen> {
             mapType: MapType.normal,
             myLocationEnabled: true,
             initialCameraPosition: _kGooglePlex,
+            polylines: polylineSet,
             onMapCreated: (controller) {
               _controller.complete(controller);
               newGooglemapController = controller;
-              // locateUserPosition();
             },
           ),
           Positioned(
             top: 80,
             left: 20,
-            child: CircleAvatar(
-              child: IconButton(
-                icon: const Icon(
-                  Icons.menu,
-                ),
-                onPressed: () {
-                  skey.currentState!.openDrawer();
-                },
-              ),
-            ),
+            child: showNavigationDrawer
+                ? CircleAvatar(
+                    child: IconButton(
+                      icon: const Icon(
+                        Icons.menu,
+                      ),
+                      onPressed: () {
+                        skey.currentState!.openDrawer();
+                      },
+                    ),
+                  )
+                : IconButton(
+                    onPressed: () => SystemNavigator.pop(),
+                    icon: Icon(Icons.close)),
           ),
           Positioned(
             bottom: 0,
@@ -133,20 +148,15 @@ class _MainScreenState extends State<MainScreen> {
                           if (Provider.of<AppInfo>(context, listen: false)
                                   .userPickupAddress ==
                               null)
-                            Text("Not getting address"),
+                            const Text("Not getting address"),
                           if (Provider.of<AppInfo>(context, listen: false)
                                   .userPickupAddress !=
                               null)
                             Text(
                               // TO DO
 
-                              (Provider.of<AppInfo>(context, listen: false)
-                                          .userPickupAddress!
-                                          .locationName
-                                          .toString())
-                                      .substring(0, 50) +
-                                  "...",
-                              style: TextStyle(color: Colors.grey),
+                              "${(Provider.of<AppInfo>(context, listen: false).userPickupAddress!.locationName.toString()).substring(0, 50)}...",
+                              style: const TextStyle(color: Colors.grey),
                             ),
                         ],
                       ),
@@ -165,67 +175,53 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                   GestureDetector(
                     onTap: () async {
-                      await Navigator.push(
+                      result = await Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SearchPagesScreen(),
+                          builder: (context) {
+                            return SearchPagesScreen();
+                          },
                         ),
                       );
-
-                      // }
-                    },
-                    child: GestureDetector(
-                      onTap: () {
-                        Navigator.push(
-                                context,
-                                MaterialPageRoute(
-                                    builder: (ctx) => SearchPagesScreen()))
-                            .then((value) async {
-                          setState(() {});
-                          print(
-                              ".....................Printing_here.....................");
-
-                          // if (result == "locationSelected") {
-                          await drawPolylineFromSourceToDestination();
+                      if (result == "locationSelected") {
+                        print(result);
+                        setState(() {
+                          showNavigationDrawer = false;
                         });
-                      },
-                      child: Row(
-                        children: [
-                          const Icon(
-                            Icons.place,
-                            color: Colors.grey,
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                "To",
-                                style:
-                                    TextStyle(color: Colors.grey, fontSize: 16),
+                      }
+                      await drawPolylineFromSourceToDestination();
+                    },
+                    child: Row(
+                      children: [
+                        const Icon(
+                          Icons.place,
+                          color: Colors.grey,
+                        ),
+                        Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            const Text(
+                              "To",
+                              style:
+                                  TextStyle(color: Colors.grey, fontSize: 16),
+                            ),
+                            if (Provider.of<AppInfo>(context, listen: false)
+                                    .userDropOffAddress ==
+                                null)
+                              const Text(
+                                "Dropoff location",
+                                style: TextStyle(color: Colors.grey),
                               ),
-                              if (Provider.of<AppInfo>(context, listen: false)
-                                      .userDropOffAddress ==
-                                  null)
-                                Text(
-                                  "Dropoff location",
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                              if (Provider.of<AppInfo>(context, listen: false)
-                                      .userDropOffAddress !=
-                                  null)
-                                Text(
-                                  Provider.of<AppInfo>(context, listen: false)
-                                          .userDropOffAddress!
-                                          .locationName
-                                          .toString()
-                                          .substring(0, 50) +
-                                      "...",
-                                  style: TextStyle(color: Colors.grey),
-                                ),
-                            ],
-                          ),
-                        ],
-                      ),
+                            if (Provider.of<AppInfo>(context, listen: false)
+                                    .userDropOffAddress !=
+                                null)
+                              Text(
+                                "${Provider.of<AppInfo>(context, listen: false).userDropOffAddress!.locationName.toString().substring(0, 50)}...",
+                                style: const TextStyle(color: Colors.grey),
+                              ),
+                          ],
+                        ),
+                      ],
                     ),
                   ),
                   const SizedBox(
@@ -241,7 +237,7 @@ class _MainScreenState extends State<MainScreen> {
                   ),
                   ElevatedButton(
                     onPressed: () {},
-                    child: Text(
+                    child: const Text(
                       "Request ride",
                       style: TextStyle(fontSize: 16),
                     ),
@@ -271,6 +267,31 @@ class _MainScreenState extends State<MainScreen> {
         await AssistantMethods.obtainOriginToDestinationDirectionDetails(
             sourceLatLng, destinationLatLng);
 
-    print(directionDetailsInfo?.e_points);
+    // print(directionDetailsInfo?.e_points);
+    PolylinePoints pPoints = PolylinePoints();
+    List<PointLatLng> decodedPointsResult = pPoints.decodePolyline(
+        '''knjmEnjunUbKCfEA?_@]@kMBeE@qIIoF@wH@eFFk@WOUI_@?u@j@k@`@EXLTZHh@Y`AgApAaCrCUd@cDpDuAtAoApA{YlZiBdBaIhGkFrDeCtBuFxFmIdJmOjPaChDeBlDiAdD}ApGcDxU}@hEmAxD}[tt@yNb\\yBdEqFnJqB~DeFxMgK~VsMr[uKzVoCxEsEtG}BzCkHhKWh@]t@{AxEcClLkCjLi@`CwBfHaEzJuBdEyEhIaBnCiF|K_Oz\\
+                {MdZwAbDaKbUiB|CgCnDkDbEiE|FqBlDsLdXqQra@kX|m@aF|KcHtLm@pAaE~JcTxh@w\\`v@gQv`@}F`MqK`PeGzIyGfJiG~GeLhLgIpIcE~FsDrHcFfLqDzH{CxEwAbBgC|B}F|DiQzKsbBdeA{k@~\\oc@bWoKjGaEzCoEzEwDxFsUh^wJfOySx[uBnCgCbCoFlDmDvAiCr@eRzDuNxC_EvAiFpCaC|AqGpEwHzFoQnQoTrTqBlCyDnGmCfEmDpDyGzGsIzHuZzYwBpBsC`CqBlAsBbAqCxAoBrAqDdDcNfMgHbHiPtReBtCkD|GqAhBwBzBsG~FoAhAaCbDeBvD_BlEyM``@uBvKiA~DmAlCkA|B}@lBcChHoJnXcB`GoAnIS~CIjFDd]A|QMlD{@jH[vAk@`CoGxRgPzf@aBbHoB~HeMx^eDtJ}BnG{DhJU`@mBzCoCjDaAx@mAnAgCnBmAp@uAj@{Cr@wBPkB@kBSsEW{GV}BEeCWyAWwHs@qH?
+                cIHkDXuDn@mCt@mE`BsH|CyAp@}AdAaAtAy@lBg@pCa@jE]fEcBhRq@pJKlCk@hLFrB@lD_@xCeA`DoBxDaHvM_FzImDzFeCpDeC|CkExDiJrHcBtAkDpDwObVuCpFeCdHoIl\\uBjIuClJsEvMyDbMqAhEoDlJ{C|J}FlZuBfLyDlXwB~QkArG_AnDiAxC{G|OgEdLaE`LkBbEwG~KgHnLoEjGgDxCaC`BuJdFkFtCgCnBuClD_HdMqEzHcBpB_C|BuEzCmPlIuE|B_EtDeBhCgAdCw@rCi@|DSfECrCAdCS~Di@jDYhA_AlC{AxCcL`U{GvM_DjFkBzBsB`BqDhBaEfAsTvEmEr@iCr@qDrAiFnCcEzCaE~D_@JmFdGQDwBvCeErEoD|BcFjC}DbEuD~D`@Zr@h@?d@Wr@}@vAgCbEaHfMqA`Cy@dAg@bAO`@gCi@w@W''');
+    pLineCoordinateList.clear();
+    if (decodedPointsResult.isNotEmpty) {
+      decodedPointsResult.forEach((element) {
+        pLineCoordinateList.add(LatLng(element.latitude, element.longitude));
+      });
+    }
+    polylineSet.clear();
+    setState(() {
+      Polyline polyline = Polyline(
+        color: Colors.blue,
+        points: pLineCoordinateList,
+        polylineId: const PolylineId("PolylineId"),
+        jointType: JointType.round,
+        geodesic: true,
+        startCap: Cap.roundCap,
+        endCap: Cap.roundCap,
+      );
+      polylineSet.add(polyline);
+      print(polylineSet);
+    });
   }
 }

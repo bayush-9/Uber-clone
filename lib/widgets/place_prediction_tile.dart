@@ -28,6 +28,7 @@ class PlacePredictionTile extends StatelessWidget {
             locationName: predictedPlaceAddress['display_name'],
           ),
         );
+        print("...........popped............");
         Navigator.pop(context, "locationSelected");
       },
       child: Padding(
